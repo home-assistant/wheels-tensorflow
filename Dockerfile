@@ -15,6 +15,7 @@ RUN apk add --no-cache \
         linux-headers make openjdk11 zip patch \
         autoconf automake libtool file sed \
     \
+    && cd /usr/src \
     && curl -SL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-$HDF5_VERSION/src/hdf5-$HDF5_VERSION.tar.gz | tar xzf - \
     && cd /usr/src/hdf5-$HDF5_VERSION \
     && ./configure --prefix=/usr/local \
