@@ -22,8 +22,7 @@ jobs:
 - template: templates/azp-job-wheels.yaml@azure
   parameters:
     builderVersion: '$(versionWheels)'
-    builderArch:
-    - amd64
+    builderArch: ['amd64']
     wheelsPrebuildDir: 'tf_wheels'
     preBuild:
     - script: |
