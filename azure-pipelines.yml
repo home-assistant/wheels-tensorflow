@@ -22,8 +22,7 @@ jobs:
 - template: templates/azp-job-wheels.yaml@azure
   parameters:
     builderVersion: '$(versionWheels)'
-    builderArch:
-    - amd64
+    builderArch: ['amd64']
     wheelsPrebuildDir: 'tf_wheels'
     preBuild:
     - script: |
@@ -34,7 +33,7 @@ jobs:
           --build-arg BUILD_FROM=homeassistant/$(buildArch)-base-python:$(versionPython) \
           --build-arg BUILD_ARCH=$(buildArch) \
           --tag tensorflow:$(buildArch)
-        
+
         docker run --rm -v "$(pwd)/tf_wheels:/tf_wheels" \
           tensorflow:$(buildArch) cp /usr/src/wheels/* /tf_wheels/
       displayName: 'Build wheels'
