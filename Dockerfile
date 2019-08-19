@@ -12,7 +12,7 @@ RUN apk add --no-cache \
         freetype libpng libjpeg-turbo musl \
     && apk add --no-cache --virtual=.build-dependencies \
         git cmake build-base curl freetype-dev g++ libjpeg-turbo-dev libpng-dev \
-        linux-headers make openjdk11 zip patch \
+        linux-headers make openjdk8 zip patch \
         autoconf automake libtool file sed \
     \
     && cd /usr/src \
