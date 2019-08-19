@@ -32,7 +32,8 @@ jobs:
         docker build \
           --build-arg BUILD_FROM=homeassistant/$(buildArch)-base-python:$(versionPython) \
           --build-arg BUILD_ARCH=$(buildArch) \
-          --tag tensorflow:$(buildArch)
+          --tag tensorflow:$(buildArch) \
+          .
 
         docker run --rm -v "$(pwd)/tf_wheels:/tf_wheels" \
           tensorflow:$(buildArch) cp /usr/src/wheels/* /tf_wheels/
