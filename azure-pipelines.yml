@@ -38,6 +38,6 @@ jobs:
           .
 
         sudo docker run --rm -v "$(pwd)/tf_wheels:/tf_wheels" \
-          tensorflow:$(buildArch)
+          tensorflow:$(buildArch) \
             bash -c "cp -vf /usr/src/wheels/* /tf_wheels/"
       displayName: 'Build wheels'
