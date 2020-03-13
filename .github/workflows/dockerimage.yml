@@ -1,0 +1,17 @@
+name: Docker Image CI
+
+on:
+  push:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build -t test --build-arg BUILD_FROM=homeassistant/amd64-base-python:3.7-alpine3.10 --build-arg BUILD_ARCH=amd64 .
