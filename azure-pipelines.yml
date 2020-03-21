@@ -24,8 +24,6 @@ jobs:
     builderVersion: '$(versionWheels)'
     builderArch: ['amd64']
     wheelsPrebuildDir: 'tf_wheels'
-    buildPool:
-      name: 'Buildroot'
     preBuild:
     - script: |
         set -e
