@@ -8,9 +8,9 @@ trigger:
 pr: none
 variables:
   - name: versionWheels
-    value: '1.2-3.7-alpine3.10'
+    value: '1.6.1-3.7-alpine3.11'
   - name: versionPython
-    value: '3.7-alpine3.10'
+    value: '3.7-alpine3.11'
 resources:
   repositories:
     - repository: azure
@@ -29,15 +29,23 @@ jobs:
     preBuild:
     - script: |
         set -e
+
+        container_id="tensorflow-$(buildArch)-$(Build.SourceBranchName)"
         mkdir -p tf_wheels
 
-        sudo docker build \
+        docker build \
           --build-arg BUILD_FROM=homeassistant/$(buildArch)-base-python:$(versionPython) \
           --build-arg BUILD_ARCH=$(buildArch) \
           --tag tensorflow:$(buildArch) \
           .
 
-        sudo docker run --rm -v "$(pwd)/tf_wheels:/tf_wheels" \
+        # Copy wheels out
+        docker create --name "${container_id}"  \
           tensorflow:$(buildArch) \
-            bash -c "cp -vf /usr/src/wheels/* /tf_wheels/"
+            bash -c "sleep 90000"
+        docker cp "${container_id}:/usr/src/wheels/." tf_wheels/
+
+        docker stop "${container_id}"
+        docker rm -f "${container_id}"
+        docker rmi -f tensorflow:$(buildArch)
       displayName: 'Build wheels'
