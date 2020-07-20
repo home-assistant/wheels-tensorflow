@@ -2,28 +2,30 @@ ARG BUILD_FROM
 FROM $BUILD_FROM
 
 ARG BUILD_ARCH
-ARG TENSORFLOW_VERSION=1.13.2
-ARG BAZEL_VERSION=0.21.0
+ARG TENSORFLOW_VERSION=2.2.0
+ARG BAZEL_VERSION=2.0.0
 ARG HDF5_VERSION=1.8.21
-ENV JAVA_HOME="/usr/lib/jvm/java-1.8-openjdk"
+ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk"
 
 WORKDIR /usr/src
 RUN apk add --no-cache \
         freetype libpng libjpeg-turbo musl \
     && apk add --no-cache --virtual=.build-dependencies \
         git cmake build-base curl freetype-dev g++ libjpeg-turbo-dev libpng-dev \
-        linux-headers make openjdk8 zip patch \
+        linux-headers make openjdk11 zip patch \
         autoconf automake libtool file sed \
     \
     && cd /usr/src \
-    && curl -SL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-$HDF5_VERSION/src/hdf5-$HDF5_VERSION.tar.gz | tar xzf - \
+    && curl -SL \
+        https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-${HDF5_VERSION}/src/hdf5-$HDF5_VERSION.tar.gz | tar xzf - \
     && cd /usr/src/hdf5-$HDF5_VERSION \
     && ./configure --prefix=/usr/local \
     && make \
     && make install \
     \
     && cd /usr/src \
-    && curl -SLO https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-dist.zip \
+    && curl -SLO \
+        https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-$BAZEL_VERSION-dist.zip \
     && mkdir bazel-$BAZEL_VERSION \
     && unzip -qd bazel-$BAZEL_VERSION bazel-$BAZEL_VERSION-dist.zip \
     && cd /usr/src/bazel-$BAZEL_VERSION \
@@ -31,9 +33,12 @@ RUN apk add --no-cache \
     && cp -p output/bazel /usr/bin/ \
     \
     && cd /usr/src \
-    && pip3 install --no-cache-dir wheel six numpy \
-    && pip3 install --no-cache-dir --no-deps keras_applications==1.0.6 keras_preprocessing==1.0.5 \
-    && git clone -b v$TENSORFLOW_VERSION --depth 1 https://github.com/tensorflow/tensorflow \
+    && pip3 install --no-cache-dir \
+        --find-links "https://wheels.home-assistant.io/alpine-$(cut -d '.' -f 1-2 < /etc/alpine-release)/${BUILD_ARCH}/" \
+        wheel six numpy \
+    && pip3 install --no-cache-dir \
+        --no-deps keras_applications==1.0.6 keras_preprocessing==1.0.5 \
+    && git clone -b v${TENSORFLOW_VERSION} --depth 1 https://github.com/tensorflow/tensorflow \
     && cd /usr/src/tensorflow \
     && sed -i -e '/define TF_GENERATE_BACKTRACE/d' tensorflow/core/platform/default/stacktrace.h \
     && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/stacktrace_handler.cc \
@@ -48,9 +53,10 @@ RUN apk add --no-cache \
     && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /usr/src/wheels \
     \
     && cd /usr/src/wheels \
-    && pip3 wheel --wheel-dir /usr/src/wheels/ \
+    && pip3 wheel \
+        --wheel-dir /usr/src/wheels/ \
         --find-links "https://wheels.home-assistant.io/alpine-$(cut -d '.' -f 1-2 < /etc/alpine-release)/${BUILD_ARCH}/" \
-        tensorflow-1.13.2-*.whl \
+        tensorflow-${TENSORFLOW_VERSION}-*.whl \
     && rm -rf /usr/src/tensorflow \
     && rm -f /usr/bin/bazel \
     && rm -rf /usr/src/bazel-$BAZEL_VERSION \
