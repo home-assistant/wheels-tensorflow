@@ -5,7 +5,6 @@ ARG BUILD_ARCH
 ARG TENSORFLOW_VERSION=2.2.0
 ARG BAZEL_VERSION=2.0.0
 ARG HDF5_VERSION=1.8.21
-ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk"
 
 WORKDIR /usr/src
 RUN apk add --no-cache \
@@ -14,6 +13,9 @@ RUN apk add --no-cache \
         git cmake build-base curl freetype-dev g++ libjpeg-turbo-dev libpng-dev \
         linux-headers make openjdk11 zip patch \
         autoconf automake libtool file sed \
+    \
+    && rm -rf /usr/lib/jvm/java-11-openjdk/jre \
+    && export JAVA_HOME="/usr/lib/jvm/java-11-openjdk" \
     \
     && cd /usr/src \
     && curl -SL \
