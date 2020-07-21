@@ -4,7 +4,7 @@ FROM $BUILD_FROM
 ARG BUILD_ARCH
 ARG TENSORFLOW_VERSION=2.2.0
 ARG BAZEL_VERSION=2.0.0
-ARG HDF5_VERSION=1.8.21
+ARG HDF5_VERSION=2.10.0
 
 WORKDIR /usr/src
 RUN apk add --no-cache \
@@ -42,8 +42,8 @@ RUN apk add --no-cache \
         --no-deps keras_applications==1.0.6 keras_preprocessing==1.0.5 \
     && git clone -b v${TENSORFLOW_VERSION} --depth 1 https://github.com/tensorflow/tensorflow \
     && cd /usr/src/tensorflow \
-    && sed -i -e '/define TF_GENERATE_BACKTRACE/d' tensorflow/core/platform/default/stacktrace.h \
-    && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/stacktrace_handler.cc \
+    && sed -i -e '/define TF_HAS_STACKTRACE/d' tensorflow/core/platform/default/stacktrace.h \
+    && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/default/stacktrace_handler.cc \
     && PYTHON_BIN_PATH=/usr/local/bin/python3 PYTHON_LIB_PATH=/usr/local/lib/python3.8/site-packages \
         CC_OPT_FLAGS="-mtune=generic" TF_NEED_JEMALLOC=1 TF_CUDA_CLANG=0 TF_NEED_GCP=0 TF_NEED_HDFS=0 \
         TF_NEED_S3=0 TF_ENABLE_XLA=0 TF_NEED_GDR=0 TF_NEED_VERBS=0 TF_CUDA_CLANG=0 TF_NEED_ROCM=0 \
