@@ -7,11 +7,27 @@ ARG BAZEL_VERSION=2.0.0
 
 WORKDIR /usr/src
 RUN apk add --no-cache \
-        freetype libpng libjpeg-turbo musl \
+        freetype \
+        libpng \
+        libjpeg-turbo \
+        musl \
     && apk add --no-cache --virtual=.build-dependencies \
-        git cmake build-base curl freetype-dev g++ libjpeg-turbo-dev libpng-dev \
-        linux-headers make openjdk11 zip patch \
-        autoconf automake libtool file sed hdf5-dev \
+        git \
+        cmake \
+        build-base \
+        curl \
+        linux-headers \
+        openjdk11 \
+        zip \
+        autoconf \
+        automake \
+        libtool \
+        sed \
+        hdf5-dev \
+        libexecinfo-dev \
+        freetype-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
     \
     && rm -rf /usr/lib/jvm/java-11-openjdk/jre \
     && export JAVA_HOME="/usr/lib/jvm/java-11-openjdk" \
