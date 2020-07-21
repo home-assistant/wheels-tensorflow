@@ -51,7 +51,7 @@ RUN apk add --no-cache \
     && cd /usr/src/tensorflow \
     && sed -i -e '/define TF_HAS_STACKTRACE/d' tensorflow/core/platform/default/stacktrace.h \
     && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/default/stacktrace_handler.cc \
-    && sed -i -d '/HAVE_MALLINFO/d' third_party/llvm/llvm.bzl \
+    && sed -i -e '/HAVE_MALLINFO/d' third_party/llvm/llvm.bzl \
     && PYTHON_BIN_PATH=/usr/local/bin/python3 PYTHON_LIB_PATH=/usr/local/lib/python3.8/site-packages \
         CC_OPT_FLAGS="-mtune=generic" TF_NEED_JEMALLOC=1 TF_CUDA_CLANG=0 TF_NEED_GCP=0 TF_NEED_HDFS=0 \
         TF_NEED_S3=0 TF_ENABLE_XLA=0 TF_NEED_GDR=0 TF_NEED_VERBS=0 TF_CUDA_CLANG=0 TF_NEED_ROCM=0 \
