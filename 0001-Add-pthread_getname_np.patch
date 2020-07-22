@@ -1,0 +1,65 @@
+From 807bddddf0f24d13d4b05b261f04ef0d551bb3b2 Mon Sep 17 00:00:00 2001
+From: Pascal Vizeli <pvizeli@syshack.ch>
+Date: Tue, 21 Jul 2020 17:57:26 +0200
+Subject: [PATCH 1/1] Add pthread_getname_np
+
+Signed-off-by: Pascal Vizeli <pvizeli@syshack.ch>
+---
+ tensorflow/core/platform/default/env.cc | 34 +++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/tensorflow/core/platform/default/env.cc b/tensorflow/core/platform/default/env.cc
+index 5f7822f658..d1207f97c3 100644
+--- a/tensorflow/core/platform/default/env.cc
++++ b/tensorflow/core/platform/default/env.cc
+@@ -25,6 +25,9 @@ limitations under the License.
+ #include <sys/types.h>
+ #include <time.h>
+ #include <unistd.h>
++#include <string.h>
++#include <sys/prctl.h>
++#include <stdint.h>
+ 
+ #ifdef __FreeBSD__
+ #include <pthread_np.h>
+@@ -40,6 +43,37 @@ limitations under the License.
+ #include "tensorflow/core/platform/mutex.h"
+ #include "tensorflow/core/protobuf/error_codes.pb.h"
+ 
++
++struct pthread {
++	struct pthread *self;
++	uintptr_t *dtv;
++	struct pthread *prev, *next;
++	uintptr_t sysinfo;
++	uintptr_t canary, canary2;
++	int tid;
++};
++
++
++int pthread_getname_np(pthread_t thread, char *name, size_t len)
++{
++  struct pthread *pd = (struct pthread *) thread;
++	int fd, cs, status = 0;
++	char f[sizeof "/proc/self/task//comm" + 3*sizeof(int)];
++
++	if (len > 15) return ERANGE;
++
++	if (thread == pthread_self())
++		return prctl(PR_GET_NAME, name) ? errno : 0;
++
++	snprintf(f, sizeof f, "/proc/self/task/%d/comm", pd->tid);
++	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
++	if ((fd = open(f, O_RDONLY)) < 0 || read(fd, name, len) < 0) status = errno;
++	if (fd >= 0) close(fd);
++	pthread_setcancelstate(cs, 0);
++	return status;
++}
++
++
+ namespace tensorflow {
+ 
+ namespace {
+-- 
+2.27.0.windows.1
+
