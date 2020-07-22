@@ -26,6 +26,7 @@ RUN apk add --no-cache \
         sed \
         hdf5-dev \
         libexecinfo-dev \
+        libexecinfo-static \
         freetype-dev \
         libjpeg-turbo-dev \
         libpng-dev \
@@ -59,7 +60,10 @@ RUN apk add --no-cache \
         TF_NEED_OPENCL_SYCL=0 TF_NEED_OPENCL=0 TF_NEED_CUDA=0 TF_NEED_MPI=0 TF_NEED_IGNITE=0 \
         TF_DOWNLOAD_CLANG=0 TF_SET_ANDROID_WORKSPACE=0 \
         python3 configure.py \
-    && bazel build --config=opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --noincompatible_strict_action_env \
+    && bazel build --config=opt \
+        --linkopt=-lexecinfo --host_linkopt=-lexecinfo \
+        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
+        --noincompatible_strict_action_env \
         //tensorflow/tools/pip_package:build_pip_package \
     && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /usr/src/wheels \
     \
