@@ -6,6 +6,7 @@ ARG TENSORFLOW_VERSION=2.2.0
 ARG BAZEL_VERSION=2.0.0
 
 WORKDIR /usr/src
+COPY 0001-Add-pthread_getname_np.patch .
 RUN apk add --no-cache \
         freetype \
         libpng \
@@ -49,9 +50,11 @@ RUN apk add --no-cache \
         --no-deps keras_applications==1.0.6 keras_preprocessing==1.0.5 \
     && git clone -b v${TENSORFLOW_VERSION} --depth 1 https://github.com/tensorflow/tensorflow \
     && cd /usr/src/tensorflow \
+    && patch -d . -p 1 < ../0001-Add-pthread_getname_np.patch \
     && sed -i -e '/define TF_HAS_STACKTRACE/d' tensorflow/core/platform/default/stacktrace.h \
     && sed -i -e '/define TF_GENERATE_STACKTRACE/d' tensorflow/core/platform/default/stacktrace_handler.cc \
     && sed -i -e '/HAVE_MALLINFO/d' third_party/llvm/llvm.bzl \
+    && sed -i -e '/HAVE_BACKTRACE/d' third_party/llvm/llvm.bzl \
     && PYTHON_BIN_PATH=/usr/local/bin/python3 PYTHON_LIB_PATH=/usr/local/lib/python3.8/site-packages \
         CC_OPT_FLAGS="-mtune=generic" TF_NEED_JEMALLOC=1 TF_CUDA_CLANG=0 TF_NEED_GCP=0 TF_NEED_HDFS=0 \
         TF_NEED_S3=0 TF_ENABLE_XLA=0 TF_NEED_GDR=0 TF_NEED_VERBS=0 TF_CUDA_CLANG=0 TF_NEED_ROCM=0 \
