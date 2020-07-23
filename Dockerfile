@@ -61,6 +61,7 @@ RUN apk add --no-cache \
         TF_DOWNLOAD_CLANG=0 TF_SET_ANDROID_WORKSPACE=0 \
         python3 configure.py \
     && bazel build --config=opt \
+        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         --linkopt=-lexecinfo --host_linkopt=-lexecinfo \
         --noincompatible_strict_action_env \
         //tensorflow/tools/pip_package:build_pip_package \
