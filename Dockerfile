@@ -62,7 +62,6 @@ RUN apk add --no-cache \
         python3 configure.py \
     && bazel build --config=opt \
         --linkopt=-lexecinfo --host_linkopt=-lexecinfo \
-        --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         --noincompatible_strict_action_env \
         //tensorflow/tools/pip_package:build_pip_package \
     && ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /usr/src/wheels \
