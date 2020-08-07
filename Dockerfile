@@ -54,9 +54,8 @@ RUN apk add --no-cache \
     && pip3 wheel \
         --find-links "https://wheels.home-assistant.io/alpine-$(cut -d '.' -f 1-2 < /etc/alpine-release)/${BUILD_ARCH}/" \
         . \
-    && auditwheel repair sentencepiece-${SENTENCEPIECE_VERSION}-cp38-cp38-linux_x86_64.whl \
+    && LD_LIBRARY_PATH=/usr/local/lib auditwheel repair sentencepiece-${SENTENCEPIECE_VERSION}-cp38-cp38-linux_x86_64.whl \
         --no-update-tags \
-        -L /usr/local/lib \
         -w /usr/src/wheels \ 
     && pip3 install . \
     \
