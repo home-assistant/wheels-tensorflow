@@ -32,9 +32,17 @@ RUN apk add --no-cache \
         libjpeg-turbo-dev \
         libpng-dev \
         pkgconfig \
+        patchelf \
     \
     && rm -rf /usr/lib/jvm/java-11-openjdk/jre \
     && export JAVA_HOME="/usr/lib/jvm/java-11-openjdk" \
+    \
+    && pip3 install --no-cache-dir \
+        --find-links "https://wheels.home-assistant.io/alpine-$(cut -d '.' -f 1-2 < /etc/alpine-release)/${BUILD_ARCH}/" \
+        wheel \
+        six \
+        numpy \
+        auditwheel \
     \
     && git clone -b v${SENTENCEPIECE_VERSION} --depth 1 https://github.com/google/sentencepiece \
     && mkdir -p sentencepiece/build \
@@ -44,9 +52,12 @@ RUN apk add --no-cache \
     && make install \
     && cd ../python \
     && pip3 wheel \
-        --wheel-dir /usr/src/wheels/ \
         --find-links "https://wheels.home-assistant.io/alpine-$(cut -d '.' -f 1-2 < /etc/alpine-release)/${BUILD_ARCH}/" \
         . \
+    && auditwheel repair sentencepiece-${SENTENCEPIECE_VERSION}-cp38-cp38-linux_x86_64.whl \
+        --no-update-tags \
+        -L /usr/local/lib \
+        -w /usr/src/wheels \ 
     && pip3 install . \
     \
     && cd /usr/src \
@@ -59,9 +70,6 @@ RUN apk add --no-cache \
     && cp -p output/bazel /usr/bin/ \
     \
     && cd /usr/src \
-    && pip3 install --no-cache-dir \
-        --find-links "https://wheels.home-assistant.io/alpine-$(cut -d '.' -f 1-2 < /etc/alpine-release)/${BUILD_ARCH}/" \
-        wheel six numpy \
     && pip3 install --no-cache-dir \
         --no-deps keras_applications==1.0.6 keras_preprocessing==1.0.5 \
     && git clone -b v${TENSORFLOW_VERSION} --depth 1 https://github.com/tensorflow/tensorflow \
