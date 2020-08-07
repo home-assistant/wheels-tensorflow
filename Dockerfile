@@ -4,6 +4,7 @@ FROM $BUILD_FROM
 ARG BUILD_ARCH
 ARG TENSORFLOW_VERSION=2.2.0
 ARG BAZEL_VERSION=2.0.0
+ARG SENTENCEPIECE_VERSION=0.1.92
 
 WORKDIR /usr/src
 COPY *.patch ./
@@ -30,9 +31,23 @@ RUN apk add --no-cache \
         freetype-dev \
         libjpeg-turbo-dev \
         libpng-dev \
+        pkgconfig \
     \
     && rm -rf /usr/lib/jvm/java-11-openjdk/jre \
     && export JAVA_HOME="/usr/lib/jvm/java-11-openjdk" \
+    \
+    && git clone -b v${SENTENCEPIECE_VERSION} --depth 1 https://github.com/google/sentencepiece \
+    && mkdir -p sentencepiece/build \
+    && cd /usr/src/sentencepiece/build \
+    && cmake .. \
+    && make -j $(nproc) \
+    && make install \
+    && cd ../python \
+    && pip3 wheel \
+        --wheel-dir /usr/src/wheels/ \
+        --find-links "https://wheels.home-assistant.io/alpine-$(cut -d '.' -f 1-2 < /etc/alpine-release)/${BUILD_ARCH}/" \
+        . \
+    && pip3 install . \
     \
     && cd /usr/src \
     && curl -SLO \
