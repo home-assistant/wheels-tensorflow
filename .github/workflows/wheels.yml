@@ -15,14 +15,14 @@ on:
 
 jobs:
   build:
-    name: Build wheels with ${{ matrix.tag }} (${{ matrix.arch }})
+    name: Build wheels with ${{ matrix.tag }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         tag:
-          - "3.8-alpine3.12"
-          #- "3.9-alpine3.13"
+          #- "3.8-alpine3.12"
+          - "3.9-alpine3.13"
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2.3.4
