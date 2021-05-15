@@ -1,0 +1,68 @@
+name: Build wheels
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "Dockerfile"
+      - "*.patch"
+
+jobs:
+  build:
+    name: Build wheels with ${{ matrix.tag }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tag:
+          - "3.8-alpine3.12"
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2.3.4
+
+      - name: Enable testing
+        id: testing
+        run: |
+          testing="true"
+          if [[ "${{ github.event_name  }}" =~ release|workflow_dispatch ]]; then
+            testing="false"
+          fi
+          echo "::set-output name=testing::${testing}"
+
+      - name: Prepare tensorflow
+        run: |
+          set -e
+
+          container_id="tensorflow-amd64"
+          mkdir -p tf_wheels
+
+          docker build \
+            --build-arg BUILD_FROM=homeassistant/amd64-base-python:${{ matrix.tag }} \
+            --build-arg BUILD_ARCH=amd64 \
+            --tag tensorflow:amd64 \
+            .
+
+          # Copy wheels out
+          docker create --name "${container_id}"  \
+            tensorflow:amd64 \
+              bash -c "sleep infinity"
+          docker cp "${container_id}:/usr/src/wheels/." tf_wheels/
+
+          docker stop "${container_id}"
+          docker rm -f "${container_id}"
+          docker rmi -f tensorflow:amd64
+
+      - name: Build wheels
+        uses: home-assistant/wheels@master
+        with:
+          tag: ${{ matrix.tag }}
+          arch: amd64
+          wheels-key: ${{ secrets.WHEELS_KEY }}
+          prebuild-dir: "tf_wheels"
+          test: ${{ steps.testing.outputs.testing }}
